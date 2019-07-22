@@ -1,0 +1,11 @@
+---
+# file: test/playbook_letsencrypt.yml
+- name: Install and configure letsencrypt
+  hosts: 
+  - server.example.com
+  roles:
+    - role: melvin_suter.letsencrypt
+  vars:
+    
+
+...

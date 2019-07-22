@@ -1,0 +1,7 @@
+---
+# asible.gitea/tasks/main.yml
+- import_tasks: include-vars.yml
+
+- import_tasks: letsencrypt.yml
+  tags: ["letsencrypt"]
+...

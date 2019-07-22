@@ -1,0 +1,23 @@
+---
+# --- letsencrypt ---
+letsenctypt_optional_packages:
+- python2-certbot-nginx
+letsencrypt_mail: "letsencrypt@example.com"
+
+# --- cert ---
+letsencrypt_options: "--nginx"
+letsencrypt_name: "example"
+letsencrypt_domain : "example.com"
+letsencrypt_domain_aliases:
+- "sub.example.com"
+letsencrypt_target_crt:  /tmp/crt.pem
+nletsencrypt_target_key: /tmp/key.pem
+
+# --- renewal script ---
+letsencrypt_renewal_script: /opt/letsencrypt_renewal.sh
+letsencrypt_renewal_user: root
+letsencrypt_renewal_group: root
+letsencrypt_renewal_cron_name: letsencrypt-renewal
+letsencrypt_renewal_cron_minute: "0"
+letsencrypt_renewal_cron_hour: "0,12"
+letsencrypt_renewal_run_after: "systemctl restart nginx"

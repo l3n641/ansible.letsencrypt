@@ -1,0 +1,59 @@
+---
+  - name: Install letsencrypt packages
+    yum:
+      name: "{{ letsencrypt_packages }}"
+      state: installed
+
+  - name: Install optional packages
+    yum:
+      name: "{{ item }}"
+      state: installed
+    with_items: "{{ letsenctypt_optional_packages }}"
+
+  - name: Create Certificates
+    command: certbot certonly --agree-tos --nginx --cert-name {{ letsencrypt_name }} --email {{ letsencrypt_mail }} -n -d {{ letsencrypt_domain }} {{ letsencrypt_domain_aliases | map('regex_replace', '^(.*)$', '-d \1') | join(' ') }}
+
+  - name: Delete existing cert/key
+    file:
+      dest: "{{ item }}"
+      state: absent
+    with_items:
+    - "{{ letsencrypt_target_crt }}"
+    - "{{ nletsencrypt_target_key }}"
+
+  - name: Symlink Cert
+    file:
+      src: "/etc/letsencrypt/live/{{ letsencrypt_name }}/cert.pem"
+      dest: "{{ letsencrypt_target_crt }}"
+      state: link
+
+  - name: Symlink Key
+    file:
+      src: "/etc/letsencrypt/live/{{ letsencrypt_name }}/privkey.pem"
+      dest: "{{ nletsencrypt_target_key }}"
+      state: link
+
+  - name: Restart Nginx
+    systemd:
+      name: nginx
+      state: restarted
+
+  - name: Copy letsencrypt renew script
+    template:
+      src: templates/letsencrypt.sh.j2
+      dest: "{{ letsencrypt_renewal_script }}"
+      owner: "{{ letsencrypt_renewal_user }}"
+      group: "{{ letsencrypt_renewal_group }}"
+      mode: '0750'
+
+  - name: Creates cron file
+    cron:
+      name: "{{ letsencrypt_renewal_cron_name }}"
+      minute: "{{ letsencrypt_renewal_cron_minute }}"
+      hour: "{{ letsencrypt_renewal_cron_hour }}"
+      user: "{{ letsencrypt_renewal_user }}"
+      job: "{{ letsencrypt_renewal_script }} > /dev/null"
+      cron_file: "{{ letsencrypt_renewal_cron_name }}"
+
+ 
+...
